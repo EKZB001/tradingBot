@@ -1,0 +1,37 @@
+
+============================================================
+  RAPORT BACKTESTU -- XAUUSD M5
+============================================================
+
+  Okres:           2024-12-18 15:40:00 -> 2026-05-20 17:10:00
+  Czas trwania:    518 days 01:30:00
+  Ekspozycja:      55.9%
+
+  --- KAPITAL ---
+  Kapital poczatkowy:   $10,000.00
+  Kapital koncowy:      $14,365.85
+  Szczyt equity:        $15,280.15
+
+  --- ZWROTY ---
+  Zysk/Strata netto:    $4,365.85 (+43.66%)
+  Buy & Hold:           +69.74%
+  CAGR:                 +19.27%
+
+  --- RYZYKO ---
+  Max Drawdown:         -8.46%
+  Avg Drawdown:         -0.36%
+  Sharpe Ratio:         1.6559
+  Sortino Ratio:        3.6334
+  Calmar Ratio:         3.3968
+
+  --- TRANSAKCJE ---
+  Liczba transakcji:    1382
+  Win Rate:             35.2%
+  Avg Trade:            +0.03%
+  Best Trade:           +4.48%
+  Worst Trade:          -2.62%
+  Profit Factor:        1.2297
+  SQN:                  2.0437
+  Expectancy:           +0.03%
+
+============================================================

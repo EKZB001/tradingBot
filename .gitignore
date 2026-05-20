@@ -1,0 +1,31 @@
+# Dane wrażliwe
+.env
+
+# Dane lokalne (surowe i przetworzone)
+data/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Obiekty scalerów i modeli
+*.joblib
+
+# IDE
+.vscode/
+.idea/
+
+# System
+Thumbs.db
+.DS_Store
+
+# Wirtualne środowisko
+venv/
+.venv/
+
+# Markdown files
+*.md
+
+# Log files
+*.log

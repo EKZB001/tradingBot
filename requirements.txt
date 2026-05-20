@@ -1,0 +1,40 @@
+# ============================================
+# Faza 1: Data Pipeline & Feature Engineering
+# ============================================
+
+# Połączenie z MetaTrader 5
+MetaTrader5>=5.0.45
+
+# Przetwarzanie danych
+pandas>=2.0
+numpy>=1.24
+
+# Format zapisu danych (Parquet z kompresją)
+pyarrow>=14.0
+
+# Wskaźniki techniczne (Feature Engineering) — pure Python, brak zależności od numba
+ta>=0.11
+
+# Machine Learning — skalowanie i preprocessing
+scikit-learn>=1.3
+joblib>=1.3
+
+# Bezpieczne ładowanie zmiennych środowiskowych
+python-dotenv>=1.0
+
+# ============================================
+# Faza 2: Backtesting
+# ============================================
+
+# Silnik backtestingowy (kompatybilny z Python 3.14)
+backtesting>=0.3.3
+
+# ============================================
+# Faza 3: Model Training & Inference
+# ============================================
+
+# Gradient Boosting z akceleracją GPU (CUDA)
+xgboost>=2.0
+
+# Wykresy feature importance i confusion matrix
+matplotlib>=3.8
