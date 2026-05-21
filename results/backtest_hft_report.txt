@@ -1,0 +1,19 @@
+
+==================================================
+  TICK BACKTEST RESULTS
+==================================================
+  Total Trades:   2503
+  Win Rate:       79.5%
+  Profit Factor:  4.25
+  Total PnL:      $357.81
+  Avg Trade PnL:  $0.14
+  Gross Profit:   $467.89
+  Gross Loss:     $-110.08
+  Max Drawdown:   $1.08
+  Final Equity:   $10357.81
+==================================================
+
+Model: xgboost_hft_XAUUSD.joblib
+Features: 689
+Test samples: 9310
+BUY signals: 4698

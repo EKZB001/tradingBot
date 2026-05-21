@@ -38,3 +38,10 @@ xgboost>=2.0
 
 # Wykresy feature importance i confusion matrix
 matplotlib>=3.8
+
+# ============================================
+# Faza HFT: Tick Scalper
+# ============================================
+
+# Pobieranie danych tikowych z HuggingFace Hub
+huggingface_hub>=0.20

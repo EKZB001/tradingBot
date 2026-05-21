@@ -210,3 +210,64 @@ def _validate_order_result(
     )
 
     return False
+
+
+def open_buy_with_sl_tp(
+    symbol: str,
+    volume: float,
+    sl_pips: float,
+    tp_pips: float,
+    pip_size: float,
+    magic: int = 20250521,
+) -> bool:
+    """
+    Otwiera pozycje BUY z predefiniowanym Stop Loss i Take Profit.
+
+    Uzywane przez HFT scalper — kazda pozycja musi miec sztywne SL/TP.
+
+    Args:
+        symbol: Instrument finansowy (np. 'XAUUSD').
+        volume: Wolumen w lotach.
+        sl_pips: Stop Loss w pipsach (odleglosc od ceny wejscia).
+        tp_pips: Take Profit w pipsach.
+        pip_size: Rozmiar pipsa (0.01 dla XAUUSD).
+        magic: Magic number bota.
+
+    Returns:
+        True jesli zlecenie wykonane pomyslnie.
+    """
+    symbol_info = mt5.symbol_info(symbol)
+    if symbol_info is None:
+        logger.error("Symbol %s nie jest dostepny w terminalu MT5.", symbol)
+        return False
+
+    if not symbol_info.visible:
+        mt5.symbol_select(symbol, True)
+
+    price = mt5.symbol_info_tick(symbol).ask
+    sl = round(price - sl_pips * pip_size, symbol_info.digits)
+    tp = round(price + tp_pips * pip_size, symbol_info.digits)
+
+    request = {
+        "action": mt5.TRADE_ACTION_DEAL,
+        "symbol": symbol,
+        "volume": volume,
+        "type": mt5.ORDER_TYPE_BUY,
+        "price": price,
+        "sl": sl,
+        "tp": tp,
+        "deviation": 20,
+        "magic": magic,
+        "comment": "HFT Scalper BUY",
+        "type_time": mt5.ORDER_TIME_GTC,
+        "type_filling": mt5.ORDER_FILLING_IOC,
+    }
+
+    logger.info(
+        "Wysylanie BUY+SL/TP: %s %.2f lot @ %.5f, SL=%.5f, TP=%.5f",
+        symbol, volume, price, sl, tp,
+    )
+
+    result = mt5.order_send(request)
+    return _validate_order_result(result, "BUY+SL/TP", symbol, volume, price)
+

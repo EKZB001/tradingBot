@@ -222,3 +222,90 @@ class PipelineConfig:
     technical: TechnicalConfig = field(default_factory=TechnicalConfig)
     volatility: VolatilityConfig = field(default_factory=VolatilityConfig)
     target: TargetConfig = field(default_factory=TargetConfig)
+
+
+# ============================================
+# Faza HFT: Tick Scalper
+# ============================================
+
+HFT_DATA_DIR = DATA_DIR / "hft"
+
+
+@dataclass(frozen=True)
+class HFTConfig:
+    """
+    Konfiguracja systemu HFT Tick Scalper.
+
+    GPU: RTX 4070 Super (12 GB VRAM) — trening przyrostowy w batchach.
+    """
+
+    symbol: str = "XAUUSD"
+    pip_size: float = 0.01
+
+    # --- Zrodlo danych HuggingFace ---
+    hf_repo: str = "Snail000/Tickmill-XAUUSD-Ticks"
+    train_file: str = "workspace/prepared/features/gold_train.csv"
+    val_file: str = "workspace/prepared/features/gold_val.csv"
+    test_file: str = "workspace/prepared/features/gold_test.csv"
+
+    # --- Chunking (ladowanie CSV partiami) ---
+    chunk_size: int = 500_000
+    batch_rows: int = 2_000_000
+
+    # --- Feature Engineering: okna tikowe ---
+    velocity_windows: tuple[int, ...] = (10, 50, 100, 200)
+    micro_vol_windows: tuple[int, ...] = (20, 50, 100)
+    macro_vol_window: int = 500  # ~15 min przy ~0.5s/tik
+
+    # --- Target: Triple-Barrier ---
+    tp_pips: float = 30.0
+    sl_pips: float = 15.0
+    max_holding_ticks: int = 500
+
+    # --- Trening XGBoost (out-of-core GPU) ---
+    n_estimators_per_batch: int = 200
+    max_total_rounds: int = 2000
+    max_depth: int = 6
+    learning_rate: float = 0.05
+    min_child_weight: int = 10
+    subsample: float = 0.8
+    colsample_bytree: float = 0.7
+    gamma: float = 0.2
+    reg_alpha: float = 0.1
+    reg_lambda: float = 1.0
+    early_stopping_rounds: int = 30
+    device: str = "cuda"
+    tree_method: str = "hist"
+
+    # --- Live scalper ---
+    tick_buffer_size: int = 500
+    live_volume: float = 0.01
+    live_magic: int = 20250521
+    tick_sleep_seconds: float = 0.1
+
+    # --- Backtester ---
+    spread_cost_pips: float = 2.0
+    commission_per_lot: float = 4.50
+    initial_cash: float = 10_000.0
+
+    # --- Kolumny surowe wykluczone z features ---
+    raw_columns: tuple[str, ...] = (
+        "time", "open", "high", "low", "close",
+        "volume", "real_volume", "spread", "target",
+    )
+
+    @property
+    def data_dir(self) -> Path:
+        """Katalog danych HFT."""
+        return HFT_DATA_DIR
+
+    @property
+    def model_path(self) -> Path:
+        """Sciezka do zapisu modelu HFT."""
+        return MODELS_DIR / "xgboost_hft_XAUUSD.joblib"
+
+    @property
+    def scaler_path(self) -> Path:
+        """Sciezka do zapisu scalera HFT."""
+        return SCALERS_DIR / "XAUUSD_hft_scaler.joblib"
+
