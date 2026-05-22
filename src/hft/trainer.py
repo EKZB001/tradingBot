@@ -244,10 +244,18 @@ class HFTTrainer:
             return None
 
     def _detect_feature_columns(self, df: pd.DataFrame) -> list[str]:
-        """Wykrywa kolumny features (wszystkie numeryczne minus raw + target)."""
-        exclude = set(self.config.raw_columns)
-        numeric_cols = df.select_dtypes(include=[np.number]).columns.tolist()
-        return [c for c in numeric_cols if c not in exclude]
+        """
+        Zwraca scisle zdefiniowana liste cech HFT, ktore sa uzywane w live tradingu.
+        Gwarantuje zgodnosc wymiarow miedzy treningiem a live_scalper.py.
+        """
+        from src.hft.live_buffer import TickBuffer
+        names = TickBuffer(self.config).get_feature_names()
+        
+        missing = [c for c in names if c not in df.columns]
+        if missing:
+            logger.warning("Brakuje kolumn w DataFrame: %s", missing)
+            
+        return [c for c in names if c in df.columns]
 
     def _extract_xy(
         self,

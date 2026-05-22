@@ -28,9 +28,13 @@ import logging
 import signal
 import sys
 import time
+import warnings
 from pathlib import Path
 
 import numpy as np
+
+# Wycisz ostrzezenia XGBoost o niedopasowaniu urzadzen (CUDA vs CPU dla pojedynczych predykcji)
+warnings.filterwarnings("ignore", category=UserWarning, module="xgboost")
 
 # Dodaj root projektu do sys.path
 PROJECT_ROOT = Path(__file__).resolve().parent
@@ -135,6 +139,8 @@ def main() -> None:
     tick_buffer = TickBuffer(config)
     last_tick_time = 0.0
     trades_count = 0
+    ticks_processed = 0
+    last_heartbeat_time = time.time()
 
     logger.info("=" * 60)
     logger.info("  SCALPER URUCHOMIONY — Ctrl+C aby zatrzymac")
@@ -166,8 +172,13 @@ def main() -> None:
             )
             tick_buffer.push(tick_data)
 
-            # Czy bufor jest gotowy do predykcji?
-            if not tick_buffer.is_ready():
+            # Czy bufor jest pelny do predykcji?
+            if tick_buffer.size < config.tick_buffer_size:
+                # Status progresu ladowania bufora
+                current_size = tick_buffer.size
+                target_size = config.tick_buffer_size
+                if current_size % 50 == 0 or current_size == target_size:
+                    logger.info("Zbieranie danych... [%d/%d tikow]", current_size, target_size)
                 continue
 
             # Oblicz cechy (pure numpy — bez DataFrame)
@@ -184,6 +195,21 @@ def main() -> None:
             # Predykcja modelu
             features_2d = features.reshape(1, -1) if features.ndim == 1 else features
             prediction = model.predict(features_2d)[0]
+            
+            # Heartbeat logic
+            ticks_processed += 1
+            current_time = time.time()
+            if ticks_processed % 500 == 0 or (current_time - last_heartbeat_time) >= 60.0:
+                prob = float(model.predict_proba(features_2d)[0][1]) if hasattr(model, "predict_proba") else float(prediction)
+                spread_pts = int(round((tick.ask - tick.bid) / config.pip_size * 10))
+                logger.info(
+                    "[STATUS] Przeanalizowano kolejne %d tików | Ostatnia predykcja ML: %.2f | Aktualny spread: %d",
+                    ticks_processed, prob, spread_pts
+                )
+                # Resetuj counter tylko przy logowaniu z czasu, aby nie rozjechalo sie "% 500"
+                if (current_time - last_heartbeat_time) >= 60.0:
+                    ticks_processed = 0
+                last_heartbeat_time = current_time
 
             if prediction != 1:
                 # Brak sygnalu — NIE logujemy (pkt 6: asynchroniczne logowanie)

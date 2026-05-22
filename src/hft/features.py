@@ -59,6 +59,11 @@ def add_hft_features(
 
     # Jedno przypisanie — brak fragmentacji DataFrame
     if new_cols:
+        # Usun istniejace kolumny o tych samych nazwach (np. hour_sin juz jest w dataset)
+        overlap = [c for c in new_cols.keys() if c in df.columns]
+        if overlap:
+            df = df.drop(columns=overlap)
+            
         new_df = pd.DataFrame(new_cols, index=df.index)
         df = pd.concat([df, new_df], axis=1)
 
